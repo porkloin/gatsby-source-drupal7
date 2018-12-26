@@ -1,7 +1,7 @@
 {
   "name": "gatsby-source-drupal7",
   "description": "Gatsby source plugin for Drupal 7",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Ryan Bateman <rybateman@gmail.com>",
   "bugs": {
     "url": "https://github.com/porkloin/gatsby-source-drupal7/issues"
