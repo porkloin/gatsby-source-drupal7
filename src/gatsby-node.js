@@ -19,7 +19,7 @@ exports.sourceNodes = async (
   const { createNode } = actions
 
   // Default apiBase to `jsonapi`
-  apiBase = apiBase || `jsonapi`
+  apiBase = apiBase || `restws_resource.json`
 
   // Fetch articles.
   // console.time(`fetch Drupal data`)
