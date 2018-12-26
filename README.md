@@ -13,7 +13,7 @@ Drupal 7 site with the following modules installed and enabled:
 - [uuid](https://www.drupal.org/project/uuid)
 
 ## Install:
-`npm install --save gatsby-source-drupal`
+`npm install --save gatsby-source-drupal7`
 
 ## Configuration:
 ```
