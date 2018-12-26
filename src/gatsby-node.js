@@ -29,7 +29,13 @@ exports.sourceNodes = async (
   const allData = await Promise.all(
     _.map(data.data.list, async (listItem) => {
       let resourceName = listItem.name;
-      let url = `${baseUrl}${listItem.path}`;
+      let url;
+      if (_.endsWith(listItem.path, '.json')) {
+        url = `${baseUrl}${listItem.path}`;
+      }
+      else {
+        url = `${baseUrl}${listItem.path}.json`;
+      }
       if (listItem.name === 'restws_resource') return
       /*
       if (type === `self`) return
