@@ -44,6 +44,7 @@ exports.sourceNodes = async (
   const allData = await Promise.all(
     _.map(data.data.list, async (listItem) => {
       console.log(listItem);
+      let resourceName = listItem.name;
       let url = `${baseUrl}${listItem.path}`;
       if (listItem.name === 'restws_resource') return
       /*
@@ -60,6 +61,8 @@ exports.sourceNodes = async (
             return []
           } else if (error.response && error.response.status == 403) {
             // We can't access that resource.
+            console.warn(`WARN: Access denied. Failed to fetch ${url} `, error.message);
+            console.log('Proceeding anyway, but you should ensure you do not need access to this resource.');
             return []
           } else {
             console.error(`Failed to fetch ${url}`, error.message)
@@ -68,6 +71,9 @@ exports.sourceNodes = async (
           }
         }
         data = data.concat(d.data.list)
+        if (!data.name) {
+          data.name = resourceName;
+        }
         if (d.data.next && d.data.self !== d.data.last) {
           data = await getNext(d.data.next, data)
         }
@@ -138,10 +144,11 @@ exports.sourceNodes = async (
   const nodes = []
   _.each(allData, contentType => {
     if (!contentType) return
-
+    let resourceName = contentType.data.name;
     _.each(contentType.data, datum => {
+      console.log(resourceName);
       if (!datum) return
-      const node = nodeFromData(datum, createNodeId)
+      const node = nodeFromData(datum, createNodeId, resourceName)
 
       //      node.relationships = {}
 
