@@ -41,10 +41,10 @@ module.exports = {
       options: {
         baseUrl: `https://live-mydrupal7site.pantheonsite.io/`,
         apiBase: `restws_resource.json`, // optional, defaults to `restws_resource.json`
-				basicAuth: {
+        basicAuth: {
           username: process.env.BASIC_AUTH_USERNAME,
-					password: process.env.BASIC_AUTH_PASSWORD,
-				},
+          password: process.env.BASIC_AUTH_PASSWORD,
+        },
       },
     },
   ],
@@ -55,8 +55,8 @@ module.exports = {
 ```
 {
   allNode {
-		edges {
-			node {
+    edges {
+      node {
         data {
           title
           created
@@ -65,7 +65,7 @@ module.exports = {
           }
         }
       }
-		}
-	}
+    }
+  }
 }
 ```
