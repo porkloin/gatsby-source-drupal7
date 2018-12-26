@@ -21,29 +21,13 @@ exports.sourceNodes = async (
   // Default apiBase to `jsonapi`
   apiBase = apiBase || `jsonapi`
 
-  // Touch existing Drupal nodes so Gatsby doesn't garbage collect them.
-  // _.values(store.getState().nodes)
-  // .filter(n => n.internal.type.slice(0, 8) === `drupal__`)
-  // .forEach(n => touchNode({ nodeId: n.id }))
-
   // Fetch articles.
   // console.time(`fetch Drupal data`)
   console.log(`Starting to fetch data from Drupal`)
 
-  // TODO restore this
-  // let lastFetched
-  // if (
-  // store.getState().status.plugins &&
-  // store.getState().status.plugins[`gatsby-source-drupal`]
-  // ) {
-  // lastFetched = store.getState().status.plugins[`gatsby-source-drupal`].status
-  // .lastFetched
-  // }
-
   const data = await axios.get(`${baseUrl}/${apiBase}`, { auth: basicAuth })
   const allData = await Promise.all(
     _.map(data.data.list, async (listItem) => {
-      console.log(listItem);
       let resourceName = listItem.name;
       let url = `${baseUrl}${listItem.path}`;
       if (listItem.name === 'restws_resource') return
@@ -60,9 +44,10 @@ exports.sourceNodes = async (
             // The endpoint doesn't support the GET method, so just skip it.
             return []
           } else if (error.response && error.response.status == 403) {
-            // We can't access that resource.
+            // We can't access that resource, 403.
             console.warn(`WARN: Access denied. Failed to fetch ${url} `, error.message);
             console.log('Proceeding anyway, but you should ensure you do not need access to this resource.');
+            // Skip it, but warn the user.
             return []
           } else {
             console.error(`Failed to fetch ${url}`, error.message)
@@ -92,104 +77,21 @@ exports.sourceNodes = async (
     })
   )
 
-  // Make list of all IDs so we can check against that when creating
-  // relationships.
-  /*const ids = {}
-  _.each(allData, contentType => {
-    console.log('allData: ' + allData);
-    console.log('contentType' + contentType);
-    if (!contentType) return
-    _.each(contentType.data, datum => {
-      ids[datum.id] = true
-    })
-  })*/
-
-  // Create back references
-  //const backRefs = {}
-
-  /**
-   * Adds back reference to linked entity, so we can later
-   * add node link.
-   */
-    /*const addBackRef = (linkedId, sourceDatum) => {
-    if (ids[linkedId]) {
-      if (!backRefs[linkedId]) {
-        backRefs[linkedId] = []
-      }
-      backRefs[linkedId].push({
-        id: sourceDatum.id,
-        type: sourceDatum.type,
-      })
-    }
-  }*/
-
-    /*_.each(allData, contentType => {
-    if (!contentType) return
-    _.each(contentType.data, datum => {
-      if (datum.relationships) {
-        _.each(datum.relationships, (v, k) => {
-          if (!v.data) return
-
-          if (_.isArray(v.data)) {
-            v.data.forEach(data => addBackRef(data.id, datum))
-          } else {
-            addBackRef(v.data.id, datum)
-          }
-        })
-      }
-    })
-  })*/
-
   // Process nodes
   const nodes = []
   _.each(allData, contentType => {
     if (!contentType) return
     let resourceName = contentType.data.name;
     _.each(contentType.data, datum => {
-      console.log(resourceName);
       if (!datum) return
       const node = nodeFromData(datum, createNodeId, resourceName)
 
-      //      node.relationships = {}
-
-      // Add relationships
-      /*if (datum.relationships) {
-        _.each(datum.relationships, (v, k) => {
-          if (!v.data) return
-          if (_.isArray(v.data) && v.data.length > 0) {
-            // Create array of all ids that are in our index
-            node.relationships[`${k}___NODE`] = _.compact(
-              v.data.map(data => (ids[data.id] ? createNodeId(data.id) : null))
-            )
-          } else if (ids[v.data.id]) {
-            node.relationships[`${k}___NODE`] = createNodeId(v.data.id)
-          }
-        })
-      }*/
-
-      // Add back reference relationships.
-      // Back reference relationships will need to be arrays,
-      // as we can't control how if node is referenced only once.
-      /*if (backRefs[datum.id]) {
-        backRefs[datum.id].forEach(ref => {
-          if (!node.relationships[`${ref.type}___NODE`]) {
-            node.relationships[`${ref.type}___NODE`] = []
-          }
-
-          node.relationships[`${ref.type}___NODE`].push(createNodeId(ref.id))
-        })
-      }*/
-
-      /*if (_.isEmpty(node.relationships)) {
-        delete node.relationships
-      }*/
-
       node.internal.contentDigest = createContentDigest(node)
-      //console.log('node: ' + JSON.stringify(node));
       nodes.push(node)
     })
   })
 
+  // TODO: figure out what is going on with files - restws throws 403 for everyone (even admin)?
   // Download all files.
   /*await Promise.all(
     nodes.map(async node => {
